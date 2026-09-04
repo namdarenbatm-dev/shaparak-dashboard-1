@@ -1,0 +1,743 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <title>داشبورد KPI کارتخوان شاپرک</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <!-- PDF.js -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+  <script>
+    pdfjsLib.GlobalWorkerOptions.workerSrc =
+      "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+  </script>
+
+  <!-- SheetJS برای خواندن اکسل -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
+  <style>
+    :root {
+      --bg: #f8fafc;
+      --card-bg: #ffffff;
+      --text: #0f172a;
+      --muted: #64748b;
+      --border: #e2e8f0;
+      --primary: #2563eb;
+      --success: #16a34a;
+      --warning-bg: #fff7ed;
+      --warning-border: #fed7aa;
+      --warning-text: #9a3412;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: Tahoma, "Segoe UI", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      direction: rtl;
+      text-align: right;
+      padding: 20px;
+    }
+
+    h1, h2, h3 {
+      margin: 0 0 12px 0;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .header-section {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 16px;
+    }
+
+    .upload-section {
+      display: grid;
+      gap: 12px;
+      margin-top: 12px;
+    }
+
+    .upload-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    label {
+      font-size: 14px;
+      color: var(--muted);
+    }
+
+    input[type="file"] {
+      padding: 8px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: #fff;
+    }
+
+    button {
+      padding: 10px 16px;
+      border: none;
+      border-radius: 8px;
+      background: var(--primary);
+      color: #fff;
+      cursor: pointer;
+      font-size: 14px;
+    }
+
+    button:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .status-text {
+      font-size: 13px;
+      color: var(--muted);
+      margin-top: 6px;
+    }
+
+    .kpi-section {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px;
+      margin-top: 16px;
+    }
+
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 12px;
+      margin-top: 12px;
+    }
+
+    .kpi-card {
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 12px;
+      background: #fff;
+    }
+
+    .kpi-title {
+      font-size: 13px;
+      color: var(--muted);
+      margin: 0 0 8px 0;
+    }
+
+    .kpi-value {
+      font-size: 18px;
+      color: var(--text);
+      font-weight: 700;
+    }
+
+    .warnings-box {
+      margin-top: 12px;
+      padding: 8px 10px;
+      border-radius: 8px;
+      background: var(--warning-bg);
+      border: 1px solid var(--warning-border);
+      color: var(--warning-text);
+      font-size: 13px;
+    }
+
+    .divider {
+      height: 1px;
+      background: var(--border);
+      margin: 24px 0;
+    }
+
+    .psp-section {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px;
+      margin-top: 16px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 12px;
+      font-size: 13px;
+    }
+
+    th, td {
+      border: 1px solid var(--border);
+      padding: 8px;
+      text-align: center;
+    }
+
+    th {
+      background: #f1f5f9;
+      font-weight: 700;
+    }
+
+    .info-box {
+      background: #eff6ff;
+      border: 1px solid #bfdbfe;
+      color: #1e40af;
+      padding: 10px;
+      border-radius: 8px;
+      font-size: 13px;
+      margin-top: 12px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <section class="header-section">
+      <h1>📊 داشبورد KPI کارتخوان | شاخص‌های کلیدی عملکرد شبکه POS</h1>
+      <h2>استخراج هوشمند از PDF شاپرک و محاسبه دقیق KPIها</h2>
+
+      <div class="upload-section">
+        <div class="upload-group">
+          <label for="shaparakPdfInput">گزارش ماهانه شاپرک (PDF) را انتخاب کنید</label>
+          <input type="file" id="shaparakPdfInput" accept=".pdf" />
+        </div>
+
+        <div class="upload-group">
+          <label for="pspExcelInput">یا فایل اکسل/CSV داده‌های PSP را انتخاب کنید</label>
+          <input type="file" id="pspExcelInput" accept=".xlsx,.xls,.csv" />
+        </div>
+
+        <button id="processBtn" type="button">پردازش فایل‌ها</button>
+        <div id="processStatus" class="status-text"></div>
+      </div>
+    </section>
+
+    <!-- KPIهای استخراج‌شده از PDF -->
+    <section id="pdfKpiSection" class="kpi-section" style="display:none;">
+      <h3>🎯 شاخص‌های کلیدی استخراج‌شده از گزارش شاپرک</h3>
+
+      <div class="kpi-grid">
+        <article class="kpi-card">
+          <p class="kpi-title">تعداد کل تراکنش‌های کارت‌خوان</p>
+          <strong id="kpiPosTxCount" class="kpi-value">-</strong>
+        </article>
+
+        <article class="kpi-card">
+          <p class="kpi-title">مبلغ کل تراکنش‌های کارت‌خوان (ریال)</p>
+          <strong id="kpiPosTxAmount" class="kpi-value">-</strong>
+        </article>
+
+        <article class="kpi-card">
+          <p class="kpi-title">تعداد کل کارت‌خوان‌های شبکه</p>
+          <strong id="kpiTotalPos" class="kpi-value">-</strong>
+        </article>
+
+        <article class="kpi-card">
+          <p class="kpi-title">کارت‌خوان فعال سیستمی</p>
+          <strong id="kpiActivePos" class="kpi-value">-</strong>
+        </article>
+
+        <article class="kpi-card">
+          <p class="kpi-title">کارت‌خوان غیرفعال سیستمی</p>
+          <strong id="kpiInactivePos" class="kpi-value">-</strong>
+        </article>
+      </div>
+
+      <div id="pdfWarnings" class="warnings-box" style="display:none;"></div>
+    </section>
+
+    <div class="divider"></div>
+
+    <!-- بخش PSP و جدول رتبه‌بندی -->
+    <section id="pspSection" class="psp-section" style="display:none;">
+      <h3>🎯 گیج‌های کلیدی عملکرد کل شبکه</h3>
+
+      <div class="kpi-grid">
+        <article class="kpi-card">
+          <p class="kpi-title">کل کارتخوان‌های نصب‌شده</p>
+          <strong id="kpiTotalInstalled" class="kpi-value">-</strong>
+        </article>
+
+        <article class="kpi-card">
+          <p class="kpi-title">کارتخوان‌های تراکنش‌دار (فعال)</p>
+          <strong id="kpiTotalActive" class="kpi-value">-</strong>
+        </article>
+
+        <article class="kpi-card">
+          <p class="kpi-title">کارتخوان‌های بدون تراکنش (راکد)</p>
+          <strong id="kpiTotalInactive" class="kpi-value">-</strong>
+        </article>
+      </div>
+
+      <h3 style="margin-top: 16px;">🏆 جدول شاخص‌ها و رتبه‌بندی شرکت‌های PSP</h3>
+      <table id="pspTable">
+        <thead>
+          <tr>
+            <th>رتبه</th>
+            <th>نام شرکت PSP</th>
+            <th>کارتخوان نصب‌شده</th>
+            <th>کارتخوان راکد</th>
+            <th>بهره‌وری تراکنشی (TP)</th>
+            <th>بهره‌وری مبلغی</th>
+            <th>میانگین ارزش تراکنش (ATV)</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </section>
+
+    <section id="sampleSection" class="info-box">
+      <strong>👋 داشبورد خام است.</strong> فایل PDF شاپرک یا اکسل حاوی داده‌های PSP را انتخاب و دکمه «پردازش فایل‌ها」 را بزنید.
+      <div style="margin-top: 8px;">
+        <strong>ساختار فایل ورودی نمونه (اکسل یا CSV):</strong>
+        <pre style="direction: ltr; text-align: left; margin-top: 6px;">
+psp_name,installed_pos,active_pos,total_tx_count,total_tx_amount
+PSP A,10000,8500,1200000,125000000000
+PSP B,8000,7000,950000,99000000000
+        </pre>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    // --- ابزارهای کمکی ---
+
+    function normalizePersianText(input) {
+      return input
+        .replace(/ي/g, "ی")
+        .replace(/ك/g, "ک")
+        .replace(/‌/g, " ")
+        .replace(/\s+/g, " ")
+        .trim();
+    }
+
+    function toEnglishDigits(input) {
+      const fa = "۰۱۲۳۴۵۶۷۸۹";
+      const ar = "٠١٢٣٤٥٦٧٨٩";
+
+      return input
+        .replace(/[۰-۹]/g, (char) => String(fa.indexOf(char)))
+        .replace(/[٠-٩]/g, (char) => String(ar.indexOf(char)));
+    }
+
+    function parseNumber(value) {
+      const normalized = toEnglishDigits(value)
+        .replace(/[٬,\s]/g, "")
+        .replace(/[^\d]/g, "");
+
+      if (!normalized) return null;
+
+      const numberValue = Number(normalized);
+      return Number.isFinite(numberValue) ? numberValue : null;
+    }
+
+    function getNumbersNearKeyword(text, keyword) {
+      const index = text.indexOf(keyword);
+      if (index < 0) return [];
+
+      const start = Math.max(0, index - 180);
+      const end = Math.min(text.length, index + 350);
+      const context = text.slice(start, end);
+
+      return [...context.matchAll(/[۰-۹٠-٩0-9][۰-۹٠-٩0-9٬,\s]{2,}/g)]
+        .map((match) => ({
+          raw: match[0],
+          value: parseNumber(match[0])
+        }))
+        .filter((item) => item.value !== null);
+    }
+
+    function scorePage(text) {
+      const normalized = normalizePersianText(text).toLowerCase();
+
+      const targets = [
+        "کارتخوان",
+        "کارت خوان",
+        "کارت‌خوان",
+        "فروشگاهی",
+        "فعال سیستمی",
+        "غیرفعال سیستمی",
+        "pc-pos",
+        "pos"
+      ];
+
+      return targets.reduce((score, word) => {
+        return score + (normalized.includes(word) ? 1 : 0);
+      }, 0);
+    }
+
+    function chooseBestNumber(pageText, keywords, type) {
+      const normalized = normalizePersianText(pageText);
+      const candidates = [];
+
+      for (const keyword of keywords) {
+        const numbers = getNumbersNearKeyword(normalized, keyword);
+
+        for (const number of numbers) {
+          if (number.value !== null) {
+            candidates.push({
+              value: number.value,
+              raw: number.raw
+            });
+          }
+        }
+      }
+
+      if (!candidates.length) {
+        return { value: null, rawText: null };
+      }
+
+      const filtered =
+        type === "amount"
+          ? candidates.filter((x) => x.value > 1_000_000)
+          : candidates.filter((x) => x.value > 100);
+
+      const selected =
+        type === "amount"
+          ? filtered.sort((a, b) => b.value - a.value)[0]
+          : filtered.sort((a, b) => b.value - a.value)[0];
+
+      return selected
+        ? { value: selected.value, rawText: selected.raw }
+        : { value: null, rawText: null };
+    }
+
+    // --- نقشه کلیدواژه‌ها به شاخص‌ها ---
+
+    const keywordMap = {
+      posTransactionCount: [
+        "تعداد تراکنش",
+        "تعداد کل تراکنش",
+        "کارتخوان فروشگاهی",
+        "کارت‌خوان فروشگاهی",
+        "PC-POS",
+        "POS"
+      ],
+      posTransactionAmount: [
+        "مبلغ تراکنش",
+        "ارزش تراکنش",
+        "مبلغ کل تراکنش",
+        "کارتخوان فروشگاهی",
+        "کارت‌خوان فروشگاهی",
+        "PC-POS",
+        "POS"
+      ],
+      totalPosDevices: [
+        "تعداد کارتخوان",
+        "تعداد کارت‌خوان",
+        "کارتخوان‌های شبکه",
+        "کارت‌خوان‌های شبکه",
+        "ابزارهای پذیرش"
+      ],
+      activePosDevices: [
+        "فعال سیستمی",
+        "کارتخوان فعال",
+        "کارت‌خوان فعال",
+        "ابزار فعال سیستمی"
+      ],
+      inactivePosDevices: [
+        "غیرفعال سیستمی",
+        "غیر فعال سیستمی",
+        "کارتخوان غیرفعال",
+        "کارت‌خوان غیرفعال",
+        "ابزار غیرفعال سیستمی"
+      ]
+    };
+
+    // --- تابع اصلی استخراج از PDF ---
+
+    async function extractShaparakPdf(file) {
+      const buffer = await file.arrayBuffer();
+
+      const pdf = await pdfjsLib.getDocument({
+        data: buffer,
+        disableWorker: true
+      }).promise;
+
+      const pages = [];
+
+      for (let pageNo = 1; pageNo <= pdf.numPages; pageNo++) {
+        const page = await pdf.getPage(pageNo);
+        const content = await page.getTextContent();
+
+        const text = content.items
+          .map((item) => item.str || "")
+          .join(" ");
+
+        pages.push({
+          page: pageNo,
+          text: normalizePersianText(text),
+          score: scorePage(text)
+        });
+      }
+
+      const relevantPages = pages
+        .filter((page) => page.score >= 2)
+        .sort((a, b) => b.score - a.score)
+        .slice(0, 15);
+
+      const initialMetrics = {
+        posTransactionCount: {
+          value: null,
+          rawText: null,
+          page: null,
+          confidence: "low"
+        },
+        posTransactionAmount: {
+          value: null,
+          rawText: null,
+          page: null,
+          confidence: "low"
+        },
+        totalPosDevices: {
+          value: null,
+          rawText: null,
+          page: null,
+          confidence: "low"
+        },
+        activePosDevices: {
+          value: null,
+          rawText: null,
+          page: null,
+          confidence: "low"
+        },
+        inactivePosDevices: {
+          value: null,
+          rawText: null,
+          page: null,
+          confidence: "low"
+        }
+      };
+
+      for (const [metricKey, keywords] of Object.entries(keywordMap)) {
+        const isAmount = metricKey === "posTransactionAmount";
+
+        for (const page of relevantPages) {
+          const result = chooseBestNumber(
+            page.text,
+            keywords,
+            isAmount ? "amount" : "count"
+          );
+
+          if (result.value !== null) {
+            initialMetrics[metricKey] = {
+              value: result.value,
+              rawText: result.rawText,
+              page: page.page,
+              confidence: page.score >= 4 ? "high" : "medium"
+            };
+            break;
+          }
+        }
+      }
+
+      const allText = pages.map((p) => p.text).join(" ");
+      const periodMatch = allText.match(
+        /(فروردین|اردیبهشت|خرداد|تیر|مرداد|شهریور|مهر|آبان|آذر|دی|بهمن|اسفند)\s*۱۴۰[۰-۹]/
+      );
+
+      const total = initialMetrics.totalPosDevices.value || 0;
+      const active = initialMetrics.activePosDevices.value || 0;
+      const inactive = initialMetrics.inactivePosDevices.value || 0;
+
+      const warnings = [];
+
+      if (
+        total &&
+        active &&
+        inactive &&
+        Math.abs(total - active - inactive) > 2
+      ) {
+        warnings.push(
+          "تعداد کل دستگاه‌ها با جمع فعال و غیرفعال هم‌خوان نیست."
+        );
+      }
+
+      Object.entries(initialMetrics).forEach(([key, metric]) => {
+        if (metric.value === null) {
+          warnings.push(`شاخص ${key} از فایل استخراج نشد.`);
+        }
+      });
+
+      return {
+        period: periodMatch?.[0] || null,
+        metrics: initialMetrics,
+        matchedPages: relevantPages.map((p) => p.page),
+        warnings
+      };
+    }
+
+    // --- پردازش فایل PSP (اکسل/CSV) ---
+
+    function processPspFile(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+
+        reader.onload = (e) => {
+          try {
+            const data = new Uint8Array(e.target.result);
+            const workbook = XLSX.read(data, { type: "array" });
+            const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+            const json = XLSX.utils.sheet_to_json(firstSheet);
+
+            // محاسبات KPI
+            const processed = json.map((row) => {
+              const installed = Number(row.installed_pos || 0);
+              const active = Number(row.active_pos || 0);
+              const txCount = Number(row.total_tx_count || 0);
+              const txAmount = Number(row.total_tx_amount || 0);
+
+              const inactive = installed - active;
+              const tp = installed > 0 ? txCount / installed : 0;
+              const amountProd = installed > 0 ? txAmount / installed : 0;
+              const atv = txCount > 0 ? txAmount / txCount : 0;
+
+              return {
+                psp_name: row.psp_name || "",
+                installed_pos: installed,
+                active_pos: active,
+                inactive_pos: inactive,
+                total_tx_count: txCount,
+                total_tx_amount: txAmount,
+                tx_productivity_tp: tp,
+                amount_productivity: amountProd,
+                average_tx_value_atv: atv
+              };
+            });
+
+            // رتبه‌بندی بر اساس TP
+            const sorted = processed.sort(
+              (a, b) => b.tx_productivity_tp - a.tx_productivity_tp
+            );
+
+            sorted.forEach((row, idx) => {
+              row.rank = idx + 1;
+            });
+
+            resolve(sorted);
+          } catch (err) {
+            reject(err);
+          }
+        };
+
+        reader.onerror = () => reject(new Error("خطا در خواندن فایل"));
+
+        reader.readAsArrayBuffer(file);
+      });
+    }
+
+    // --- اتصال به UI ---
+
+    const shaparakPdfInput = document.getElementById("shaparakPdfInput");
+    const pspExcelInput = document.getElementById("pspExcelInput");
+    const processBtn = document.getElementById("processBtn");
+    const processStatus = document.getElementById("processStatus");
+
+    const pdfKpiSection = document.getElementById("pdfKpiSection");
+    const kpiPosTxCount = document.getElementById("kpiPosTxCount");
+    const kpiPosTxAmount = document.getElementById("kpiPosTxAmount");
+    const kpiTotalPos = document.getElementById("kpiTotalPos");
+    const kpiActivePos = document.getElementById("kpiActivePos");
+    const kpiInactivePos = document.getElementById("kpiInactivePos");
+    const pdfWarnings = document.getElementById("pdfWarnings");
+
+    const pspSection = document.getElementById("pspSection");
+    const kpiTotalInstalled = document.getElementById("kpiTotalInstalled");
+    const kpiTotalActive = document.getElementById("kpiTotalActive");
+    const kpiTotalInactive = document.getElementById("kpiTotalInactive");
+    const pspTableBody = document.querySelector("#pspTable tbody");
+
+    const sampleSection = document.getElementById("sampleSection");
+
+    function formatNumber(value) {
+      if (value === null || value === undefined || Number.isNaN(value)) {
+        return "استخراج نشد";
+      }
+      return Number(value).toLocaleString("fa-IR");
+    }
+
+    function renderPdfMetrics(result) {
+      pdfKpiSection.style.display = "block";
+
+      const m = result.metrics;
+
+      kpiPosTxCount.textContent = formatNumber(m.posTransactionCount.value);
+      kpiPosTxAmount.textContent = formatNumber(m.posTransactionAmount.value);
+      kpiTotalPos.textContent = formatNumber(m.totalPosDevices.value);
+      kpiActivePos.textContent = formatNumber(m.activePosDevices.value);
+      kpiInactivePos.textContent = formatNumber(m.inactivePosDevices.value);
+
+      if (result.warnings.length > 0) {
+        pdfWarnings.innerHTML =
+          "<strong>هشدارها:</strong><br>" +
+          result.warnings.map((w) => "• " + w).join("<br>");
+        pdfWarnings.style.display = "block";
+      } else {
+        pdfWarnings.style.display = "none";
+      }
+    }
+
+    function renderPspTable(data) {
+      pspSection.style.display = "block";
+
+      const totalInstalled = data.reduce((sum, r) => sum + r.installed_pos, 0);
+      const totalActive = data.reduce((sum, r) => sum + r.active_pos, 0);
+      const totalInactive = data.reduce((sum, r) => sum + r.inactive_pos, 0);
+
+      kpiTotalInstalled.textContent = formatNumber(totalInstalled);
+      kpiTotalActive.textContent = formatNumber(totalActive);
+      kpiTotalInactive.textContent = formatNumber(totalInactive);
+
+      pspTableBody.innerHTML = "";
+
+      data.forEach((row) => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td>${formatNumber(row.rank)}</td>
+          <td>${row.psp_name || "-"}</td>
+          <td>${formatNumber(row.installed_pos)}</td>
+          <td>${formatNumber(row.inactive_pos)}</td>
+          <td>${formatNumber(row.tx_productivity_tp.toFixed(2))}</td>
+          <td>${formatNumber(Math.round(row.amount_productivity))} ریال</td>
+          <td>${formatNumber(Math.round(row.average_tx_value_atv))} ریال</td>
+        `;
+        pspTableBody.appendChild(tr);
+      });
+    }
+
+    processBtn.addEventListener("click", async () => {
+      const pdfFile = shaparakPdfInput.files?.[0];
+      const excelFile = pspExcelInput.files?.[0];
+
+      if (!pdfFile && !excelFile) {
+        processStatus.textContent = "لطفاً حداقل یک فایل (PDF یا اکسل/CSV) انتخاب کنید.";
+        return;
+      }
+
+      processStatus.textContent = "در حال پردازش…";
+      pdfKpiSection.style.display = "none";
+      pspSection.style.display = "none";
+
+      try {
+        if (pdfFile) {
+          const pdfResult = await extractShaparakPdf(pdfFile);
+          renderPdfMetrics(pdfResult);
+        }
+
+        if (excelFile) {
+          const pspData = await processPspFile(excelFile);
+          renderPspTable(pspData);
+        }
+
+        sampleSection.style.display = "none";
+        processStatus.textContent = "پردازش با موفقیت انجام شد.";
+      } catch (err) {
+        console.error(err);
+        processStatus.textContent = "خطا در پردازش فایل‌ها. لطفاً دوباره تلاش کنید.";
+      }
+    });
+  </script>
+</body>
+</html>
