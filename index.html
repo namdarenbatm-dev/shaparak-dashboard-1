@@ -2,17 +2,23 @@
 <html lang="fa" dir="rtl">
 <head>
   <meta charset="UTF-8" />
-  <title>داشبورد KPI کارتخوان شاپرک</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>داشبورد KPI کارتخوان شاپرک</title>
 
-  <!-- PDF.js -->
+  <!-- فونت یکان فارسی -->
+  <link
+    rel="stylesheet"
+    href="https://cdn.jsdelivr.net/gh/hemedani/yekan@v3.0.0/font-face.css"
+  />
+
+  <!-- کتابخانه PDF.js برای خواندن PDF -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
   <script>
     pdfjsLib.GlobalWorkerOptions.workerSrc =
       "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
   </script>
 
-  <!-- SheetJS برای خواندن اکسل -->
+  <!-- کتابخانه SheetJS برای خواندن Excel و CSV -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 
   <style>
@@ -23,10 +29,16 @@
       --muted: #64748b;
       --border: #e2e8f0;
       --primary: #2563eb;
-      --success: #16a34a;
+      --primary-hover: #1d4ed8;
+      --success-bg: #ecfdf5;
+      --success-border: #86efac;
+      --success-text: #166534;
       --warning-bg: #fff7ed;
       --warning-border: #fed7aa;
       --warning-text: #9a3412;
+      --info-bg: #eff6ff;
+      --info-border: #bfdbfe;
+      --info-text: #1e40af;
     }
 
     * {
@@ -35,251 +47,358 @@
 
     body {
       margin: 0;
-      font-family: Tahoma, "Segoe UI", sans-serif;
-      background: var(--bg);
-      color: var(--text);
+      padding: 20px;
       direction: rtl;
       text-align: right;
-      padding: 20px;
+      font-family: Yekan, BYekan, Tahoma, "Segoe UI", sans-serif;
+      background: var(--bg);
+      color: var(--text);
     }
 
-    h1, h2, h3 {
-      margin: 0 0 12px 0;
+    button,
+    input,
+    select,
+    textarea,
+    table,
+    th,
+    td {
+      font-family: Yekan, BYekan, Tahoma, "Segoe UI", sans-serif;
     }
 
-    .container {
-      max-width: 1200px;
-      margin: 0 auto;
+    h1,
+    h2,
+    h3,
+    h4,
+    p {
+      margin-top: 0;
     }
 
-    .header-section {
-      background: var(--card-bg);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 16px;
+    h1 {
+      font-size: 25px;
+      margin-bottom: 8px;
+    }
+
+    h2 {
+      color: var(--muted);
+      font-size: 16px;
+      font-weight: 400;
+      margin-bottom: 0;
+    }
+
+    h3 {
+      font-size: 18px;
       margin-bottom: 16px;
     }
 
-    .upload-section {
+    .container {
+      width: 100%;
+      max-width: 1240px;
+      margin: 0 auto;
+    }
+
+    .panel {
+      margin-bottom: 18px;
+      padding: 20px;
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      box-shadow: 0 4px 16px rgba(15, 23, 42, 0.04);
+    }
+
+    .upload-grid {
       display: grid;
-      gap: 12px;
-      margin-top: 12px;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+      margin-top: 18px;
     }
 
     .upload-group {
       display: flex;
       flex-direction: column;
-      gap: 6px;
+      gap: 8px;
     }
 
-    label {
-      font-size: 14px;
+    .upload-group label {
       color: var(--muted);
+      font-size: 14px;
     }
 
     input[type="file"] {
-      padding: 8px;
+      width: 100%;
+      padding: 10px;
+      color: #334155;
+      background: #ffffff;
       border: 1px solid var(--border);
-      border-radius: 8px;
-      background: #fff;
+      border-radius: 10px;
+      cursor: pointer;
+    }
+
+    .button-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 16px;
     }
 
     button {
-      padding: 10px 16px;
-      border: none;
-      border-radius: 8px;
-      background: var(--primary);
-      color: #fff;
-      cursor: pointer;
+      padding: 11px 18px;
+      color: #ffffff;
       font-size: 14px;
+      background: var(--primary);
+      border: 0;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: 0.2s ease;
+    }
+
+    button:hover {
+      background: var(--primary-hover);
     }
 
     button:disabled {
-      opacity: 0.6;
       cursor: not-allowed;
+      opacity: 0.6;
     }
 
     .status-text {
-      font-size: 13px;
+      min-height: 24px;
+      margin-top: 12px;
       color: var(--muted);
-      margin-top: 6px;
+      font-size: 14px;
     }
 
-    .kpi-section {
-      background: var(--card-bg);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 16px;
-      margin-top: 16px;
+    .period-text {
+      margin-top: 8px;
+      color: var(--success-text);
+      font-size: 14px;
+      font-weight: 700;
     }
 
     .kpi-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      grid-template-columns: repeat(5, minmax(0, 1fr));
       gap: 12px;
-      margin-top: 12px;
     }
 
     .kpi-card {
+      min-height: 132px;
+      padding: 16px;
+      background: #ffffff;
       border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 12px;
-      background: #fff;
+      border-radius: 14px;
     }
 
     .kpi-title {
-      font-size: 13px;
+      min-height: 43px;
+      margin-bottom: 12px;
       color: var(--muted);
-      margin: 0 0 8px 0;
+      font-size: 13px;
+      line-height: 1.7;
     }
 
     .kpi-value {
-      font-size: 18px;
+      display: block;
+      overflow-wrap: anywhere;
       color: var(--text);
+      font-size: 20px;
       font-weight: 700;
+      line-height: 1.8;
     }
 
-    .warnings-box {
-      margin-top: 12px;
-      padding: 8px 10px;
-      border-radius: 8px;
+    .kpi-source {
+      display: block;
+      margin-top: 7px;
+      color: #94a3b8;
+      font-size: 11px;
+    }
+
+    .message-box {
+      margin-top: 16px;
+      padding: 12px;
+      border-radius: 10px;
+      font-size: 13px;
+      line-height: 1.9;
+    }
+
+    .warning-box {
+      color: var(--warning-text);
       background: var(--warning-bg);
       border: 1px solid var(--warning-border);
-      color: var(--warning-text);
-      font-size: 13px;
+    }
+
+    .info-box {
+      color: var(--info-text);
+      background: var(--info-bg);
+      border: 1px solid var(--info-border);
+    }
+
+    .success-box {
+      color: var(--success-text);
+      background: var(--success-bg);
+      border: 1px solid var(--success-border);
     }
 
     .divider {
       height: 1px;
-      background: var(--border);
       margin: 24px 0;
+      background: var(--border);
     }
 
-    .psp-section {
-      background: var(--card-bg);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 16px;
-      margin-top: 16px;
+    .table-wrapper {
+      width: 100%;
+      overflow-x: auto;
     }
 
     table {
       width: 100%;
+      min-width: 900px;
       border-collapse: collapse;
-      margin-top: 12px;
-      font-size: 13px;
     }
 
-    th, td {
-      border: 1px solid var(--border);
-      padding: 8px;
+    th,
+    td {
+      padding: 11px 8px;
       text-align: center;
+      white-space: nowrap;
+      border: 1px solid var(--border);
     }
 
     th {
+      color: #1e293b;
       background: #f1f5f9;
-      font-weight: 700;
-    }
-
-    .info-box {
-      background: #eff6ff;
-      border: 1px solid #bfdbfe;
-      color: #1e40af;
-      padding: 10px;
-      border-radius: 8px;
       font-size: 13px;
-      margin-top: 12px;
     }
 
-    .debug-section {
-      margin-top: 20px;
-      padding: 12px;
-      background: #f1f5f9;
-      border: 1px solid #cbd5e1;
-      border-radius: 8px;
-      font-size: 12px;
-      direction: rtl;
-    }
-
-    .debug-section h4 {
-      margin: 0 0 8px 0;
+    td {
       color: #334155;
+      font-size: 13px;
     }
 
-    .debug-item {
-      margin: 4px 0;
-      font-family: monospace;
+    .sample-code {
+      display: block;
       direction: ltr;
+      margin-top: 10px;
+      padding: 12px;
+      overflow-x: auto;
       text-align: left;
+      color: #0f172a;
+      font-family: Consolas, monospace;
+      background: #ffffff;
+      border: 1px solid #bfdbfe;
+      border-radius: 8px;
+    }
+
+    @media (max-width: 1050px) {
+      .kpi-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
+    }
+
+    @media (max-width: 720px) {
+      body {
+        padding: 12px;
+      }
+
+      h1 {
+        font-size: 20px;
+      }
+
+      .panel {
+        padding: 15px;
+      }
+
+      .upload-grid,
+      .kpi-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .kpi-card {
+        min-height: auto;
+      }
     }
   </style>
 </head>
+
 <body>
-  <div class="container">
-    <section class="header-section">
+  <main class="container">
+    <section class="panel">
       <h1>📊 داشبورد KPI کارتخوان شاپرک</h1>
-      <h2>استخراج هوشمند از PDF و محاسبه دقیق KPIها</h2>
+      <h2>استخراج اطلاعات گزارش شاپرک و تحلیل شاخص‌های شبکه POS</h2>
 
-      <div class="upload-section">
+      <div class="upload-grid">
         <div class="upload-group">
-          <label for="shaparakPdfInput">گزارش ماهانه شاپرک (PDF) را انتخاب کنید</label>
-          <input type="file" id="shaparakPdfInput" accept=".pdf" />
+          <label for="shaparakPdfInput">
+            گزارش ماهانه شاپرک (PDF)
+          </label>
+          <input
+            id="shaparakPdfInput"
+            type="file"
+            accept=".pdf,application/pdf"
+          />
         </div>
 
         <div class="upload-group">
-          <label for="pspExcelInput">یا فایل اکسل/CSV داده‌های PSP را انتخاب کنید</label>
-          <input type="file" id="pspExcelInput" accept=".xlsx,.xls,.csv" />
+          <label for="pspExcelInput">
+            فایل اکسل یا CSV داده‌های PSP (اختیاری)
+          </label>
+          <input
+            id="pspExcelInput"
+            type="file"
+            accept=".xlsx,.xls,.csv"
+          />
         </div>
-
-        <button id="processBtn" type="button">پردازش فایل‌ها</button>
-        <div id="processStatus" class="status-text"></div>
       </div>
+
+      <div class="button-row">
+        <button id="processBtn" type="button">
+          پردازش فایل‌ها
+        </button>
+      </div>
+
+      <div id="processStatus" class="status-text"></div>
+      <div id="periodText" class="period-text"></div>
     </section>
 
-    <!-- KPIهای استخراج‌شده از PDF -->
-    <section id="pdfKpiSection" class="kpi-section" style="display:none;">
-      <h3>🎯 شاخص‌های کلیدی استخراج‌شده از گزارش شاپرک</h3>
+    <section id="pdfKpiSection" class="panel" style="display: none;">
+      <h3>🎯 شاخص‌های استخراج‌شده از گزارش شاپرک</h3>
 
       <div class="kpi-grid">
         <article class="kpi-card">
-          <p class="kpi-title">تعداد کل تراکنش‌های کارت‌خوان</p>
+          <p class="kpi-title">۱. تعداد کل تراکنش‌های کارت‌خوان</p>
           <strong id="kpiPosTxCount" class="kpi-value">-</strong>
+          <span id="sourceTxCount" class="kpi-source"></span>
         </article>
 
         <article class="kpi-card">
-          <p class="kpi-title">مبلغ کل تراکنش‌های کارت‌خوان (ریال)</p>
+          <p class="kpi-title">۲. مبلغ کل تراکنش‌های کارت‌خوان (ریال)</p>
           <strong id="kpiPosTxAmount" class="kpi-value">-</strong>
+          <span id="sourceTxAmount" class="kpi-source"></span>
         </article>
 
         <article class="kpi-card">
-          <p class="kpi-title">تعداد کل کارت‌خوان‌های شبکه</p>
+          <p class="kpi-title">۳. تعداد کل کارت‌خوان‌های شبکه</p>
           <strong id="kpiTotalPos" class="kpi-value">-</strong>
+          <span id="sourceTotalPos" class="kpi-source"></span>
         </article>
 
         <article class="kpi-card">
-          <p class="kpi-title">کارت‌خوان فعال سیستمی</p>
+          <p class="kpi-title">۴. تعداد کارت‌خوان فعال سیستمی</p>
           <strong id="kpiActivePos" class="kpi-value">-</strong>
+          <span id="sourceActivePos" class="kpi-source"></span>
         </article>
 
         <article class="kpi-card">
-          <p class="kpi-title">کارت‌خوان غیرفعال سیستمی</p>
+          <p class="kpi-title">۵. تعداد کارت‌خوان غیرفعال سیستمی</p>
           <strong id="kpiInactivePos" class="kpi-value">-</strong>
+          <span id="sourceInactivePos" class="kpi-source"></span>
         </article>
       </div>
 
-      <div id="pdfWarnings" class="warnings-box" style="display:none;"></div>
-
-      <div id="debugSection" class="debug-section" style="display:none;">
-        <h4>🔍 اطلاعات استخراج (برای دیباگ):</h4>
-        <div id="debugContent"></div>
-      </div>
+      <div id="pdfWarnings" class="message-box warning-box" style="display: none;"></div>
     </section>
 
-    <div class="divider"></div>
-
-    <!-- بخش PSP و جدول رتبه‌بندی -->
-    <section id="pspSection" class="psp-section" style="display:none;">
-      <h3>🎯 گیج‌های کلیدی عملکرد کل شبکه</h3>
+    <section id="pspSection" class="panel" style="display: none;">
+      <h3>🏆 تحلیل و رتبه‌بندی شرکت‌های PSP</h3>
 
       <div class="kpi-grid">
         <article class="kpi-card">
@@ -298,41 +417,51 @@
         </article>
       </div>
 
-      <h3 style="margin-top: 16px;">🏆 جدول شاخص‌ها و رتبه‌بندی شرکت‌های PSP</h3>
-      <table id="pspTable">
-        <thead>
-          <tr>
-            <th>رتبه</th>
-            <th>نام شرکت PSP</th>
-            <th>کارتخوان نصب‌شده</th>
-            <th>کارتخوان راکد</th>
-            <th>بهره‌وری تراکنشی (TP)</th>
-            <th>بهره‌وری مبلغی</th>
-            <th>میانگین ارزش تراکنش (ATV)</th>
-          </tr>
-        </thead>
-        <tbody></tbody>
-      </table>
-    </section>
+      <div class="divider"></div>
 
-    <section id="sampleSection" class="info-box">
-      <strong>👋 داشبورد خام است.</strong> فایل PDF شاپرک یا اکسل حاوی داده‌های PSP را انتخاب و دکمه «پردازش فایل‌ها」 را بزنید.
-      <div style="margin-top: 8px;">
-        <strong>ساختار فایل ورودی نمونه (اکسل یا CSV):</strong>
-        <pre style="direction: ltr; text-align: left; margin-top: 6px;">
-psp_name,installed_pos,active_pos,total_tx_count,total_tx_amount
-PSP A,10000,8500,1200000,125000000000
-PSP B,8000,7000,950000,99000000000
-        </pre>
+      <div class="table-wrapper">
+        <table id="pspTable">
+          <thead>
+            <tr>
+              <th>رتبه</th>
+              <th>نام شرکت PSP</th>
+              <th>کارتخوان نصب‌شده</th>
+              <th>کارتخوان راکد</th>
+              <th>بهره‌وری تراکنشی (TP)</th>
+              <th>بهره‌وری مبلغی</th>
+              <th>میانگین ارزش تراکنش (ATV)</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
       </div>
     </section>
-  </div>
+
+    <section id="sampleSection" class="message-box info-box">
+      <strong>👋 داشبورد آماده پردازش است.</strong>
+      <br />
+      یک PDF گزارش شاپرک یا فایل اکسل/CSV شامل داده‌های PSP انتخاب کن و روی «پردازش فایل‌ها» بزن.
+
+      <code class="sample-code">psp_name,installed_pos,active_pos,total_tx_count,total_tx_amount
+PSP A,10000,8500,1200000,125000000000
+PSP B,8000,7000,950000,99000000000</code>
+    </section>
+  </main>
 
   <script>
-    // --- ابزارهای کمکی ---
+    const shaparakPdfInput = document.getElementById("shaparakPdfInput");
+    const pspExcelInput = document.getElementById("pspExcelInput");
+    const processBtn = document.getElementById("processBtn");
+    const processStatus = document.getElementById("processStatus");
+    const periodText = document.getElementById("periodText");
 
-    function normalizePersianText(input) {
-      return input
+    const pdfKpiSection = document.getElementById("pdfKpiSection");
+    const pspSection = document.getElementById("pspSection");
+    const sampleSection = document.getElementById("sampleSection");
+    const pdfWarnings = document.getElementById("pdfWarnings");
+
+    function normalizePersianText(value) {
+      return String(value || "")
         .replace(/ي/g, "ی")
         .replace(/ك/g, "ک")
         .replace(/‌/g, " ")
@@ -340,66 +469,496 @@ PSP B,8000,7000,950000,99000000000
         .trim();
     }
 
-    function toEnglishDigits(input) {
-      const fa = "۰۱۲۳۴۵۶۷۸۹";
-      const ar = "٠١٢٣٤٥٦٧٨٩";
+    function toEnglishDigits(value) {
+      const persianDigits = "۰۱۲۳۴۵۶۷۸۹";
+      const arabicDigits = "٠١٢٣٤٥٦٧٨٩";
 
-      return input
-        .replace(/[۰-۹]/g, (char) => String(fa.indexOf(char)))
-        .replace(/[٠-٩]/g, (char) => String(ar.indexOf(char)));
+      return String(value || "")
+        .replace(/[۰-۹]/g, (char) => String(persianDigits.indexOf(char)))
+        .replace(/[٠-٩]/g, (char) => String(arabicDigits.indexOf(char)));
     }
 
     function parseNumber(value) {
-      const normalized = toEnglishDigits(value)
+      const cleaned = toEnglishDigits(value)
         .replace(/[٬,\s]/g, "")
         .replace(/[^\d]/g, "");
 
-      if (!normalized) return null;
+      if (!cleaned) return null;
 
-      const numberValue = Number(normalized);
-      return Number.isFinite(numberValue) ? numberValue : null;
+      const result = Number(cleaned);
+      return Number.isFinite(result) ? result : null;
     }
 
-    function getNumbersNearKeyword(text, keyword, windowSize = 200) {
-      const index = text.indexOf(keyword);
-      if (index < 0) return [];
+    function formatNumber(value) {
+      if (value === null || value === undefined || Number.isNaN(value)) {
+        return "استخراج نشد";
+      }
 
-      const start = Math.max(0, index - windowSize);
-      const end = Math.min(text.length, index + windowSize * 2);
-      const context = text.slice(start, end);
+      return Number(value).toLocaleString("fa-IR");
+    }
 
-      const pattern = /[۰-۹٠-٩0-9][۰-۹٠-٩0-9٬,\s]{2,}/g;
-      const matches = [...context.matchAll(pattern)];
+    function getAllNumbers(text) {
+      const matches = String(text).match(/[۰-۹٠-٩0-9][۰-۹٠-٩0-9٬,\s]{2,}/g) || [];
 
       return matches
-        .map((match) => ({
-          raw: match[0],
-          value: parseNumber(match[0]),
-          position: match.index
-        }))
-        .filter((item) => item.value !== null);
+        .map((item) => parseNumber(item))
+        .filter((item) => item !== null);
     }
 
-    function scorePage(text) {
-      const normalized = normalizePersianText(text).toLowerCase();
+    function findNumberNearKeywords(text, keywords, min, max) {
+      const normalized = normalizePersianText(text);
+      const candidates = [];
 
-      const targets = [
-        "کارتخوان",
-        "کارت خوان",
-        "کارت‌خوان",
-        "فروشگاهی",
-        "فعال سیستمی",
-        "غیرفعال سیستمی",
-        "pc-pos",
-        "pos",
-        "۹۱۶۴",
-        "9164"
-      ];
+      for (const keyword of keywords) {
+        let startIndex = 0;
+        let index = normalized.indexOf(keyword, startIndex);
 
-      return targets.reduce((score, word) => {
-        return score + (normalized.includes(word) ? 1 : 0);
-      }, 0);
+        while (index !== -1) {
+          const before = Math.max(0, index - 250);
+          const after = Math.min(normalized.length, index + 350);
+          const context = normalized.slice(before, after);
+
+          const matchList = [...context.matchAll(/[۰-۹٠-٩0-9][۰-۹٠-٩0-9٬,\s]{2,}/g)];
+
+          for (const match of matchList) {
+            const value = parseNumber(match[0]);
+
+            if (value !== null && value >= min && value <= max) {
+              candidates.push({
+                value,
+                keyword,
+                distance: Math.abs((before + match.index) - index)
+              });
+            }
+          }
+
+          startIndex = index + keyword.length;
+          index = normalized.indexOf(keyword, startIndex);
+        }
+      }
+
+      candidates.sort((a, b) => a.distance - b.distance);
+      return candidates.length ? candidates[0] : null;
     }
 
-    function findBestNumberForMetric(pageText, metricType) {
-      const normalized = normalizePers
+    function findNumberByRange(fullText, min, max) {
+      const numbers = getAllNumbers(fullText).filter(
+        (number) => number >= min && number <= max
+      );
+
+      return numbers.length ? numbers[0] : null;
+    }
+
+    async function extractShaparakPdf(file) {
+      const bytes = await file.arrayBuffer();
+
+      const pdf = await pdfjsLib.getDocument({
+        data: bytes,
+        disableWorker: true
+      }).promise;
+
+      const pages = [];
+      let completeText = "";
+
+      for (let pageNumber = 1; pageNumber <= pdf.numPages; pageNumber += 1) {
+        const page = await pdf.getPage(pageNumber);
+        const content = await page.getTextContent();
+
+        const pageText = normalizePersianText(
+          content.items.map((item) => item.str || "").join(" ")
+        );
+
+        pages.push({
+          pageNumber,
+          text: pageText
+        });
+
+        completeText += `\n${pageText}`;
+      }
+
+      const result = {
+        period: null,
+        transactionCount: null,
+        transactionAmount: null,
+        totalDevices: null,
+        activeDevices: null,
+        inactiveDevices: null,
+        sources: {
+          transactionCount: "",
+          transactionAmount: "",
+          totalDevices: "",
+          activeDevices: "",
+          inactiveDevices: ""
+        },
+        warnings: []
+      };
+
+      const periodMatch = completeText.match(
+        /(فروردین|اردیبهشت|خرداد|تیر|مرداد|شهریور|مهر|آبان|آذر|دی|بهمن|اسفند)\s*۱۴۰[۰-۹]/
+      );
+
+      result.period = periodMatch ? periodMatch[0] : null;
+
+      /*
+        تراکنش کارت‌خوان فروشگاهی:
+        در گزارش نمونه، ردیف ابزار PC-POS/کد 9164 در بخش ابزارهای پذیرش است.
+        برای پیدا کردن آن، ابتدا صفحه‌هایی که 9164 یا PC-POS دارند بررسی می‌شوند.
+      */
+      const posPages = pages.filter((page) =>
+        page.text.includes("9164") ||
+        page.text.includes("۹۱۶۴") ||
+        page.text.toLowerCase().includes("pc-pos") ||
+        page.text.toLowerCase().includes("eftpos")
+      );
+
+      for (const page of posPages) {
+        const numbers = getAllNumbers(page.text);
+
+        const transactionCandidate = numbers.find(
+          (number) => number >= 1_000_000_000 && number <= 10_000_000_000
+        );
+
+        if (transactionCandidate && !result.transactionCount) {
+          result.transactionCount = transactionCandidate;
+          result.sources.transactionCount = `صفحه ${page.pageNumber}`;
+        }
+
+        const amountCandidate = numbers.find(
+          (number) => number >= 10_000_000_000
+        );
+
+        if (amountCandidate && !result.transactionAmount) {
+          result.transactionAmount = amountCandidate;
+          result.sources.transactionAmount = `صفحه ${page.pageNumber}`;
+        }
+      }
+
+      /*
+        تعداد کل کارت‌خوان:
+        مقدار مورد انتظار گزارش‌های شاپرک در مقیاس حدود 8 تا 15 میلیون است.
+        فقط اعداد نزدیک کلیدواژه‌های ابزار کارت‌خوان بررسی می‌شوند.
+      */
+      const totalCandidate = findNumberNearKeywords(
+        completeText,
+        [
+          "تعداد کل کارتخوان",
+          "تعداد کارتخوان",
+          "کارتخوان‌های شبکه",
+          "کارت‌خوان‌های شبکه",
+          "کارتخوان فروشگاهی",
+          "کارت‌خوان فروشگاهی",
+          "ابزارهای پذیرش"
+        ],
+        8_000_000,
+        15_000_000
+      );
+
+      if (totalCandidate) {
+        result.totalDevices = totalCandidate.value;
+        result.sources.totalDevices = `کلیدواژه: ${totalCandidate.keyword}`;
+      }
+
+      /*
+        کارت‌خوان غیرفعال:
+        معمولاً در محدوده تقریبی 1 تا 5 میلیون قرار دارد.
+      */
+      const inactiveCandidate = findNumberNearKeywords(
+        completeText,
+        [
+          "غیرفعال سیستمی",
+          "غیر فعال سیستمی",
+          "کارتخوان غیرفعال",
+          "کارت‌خوان غیرفعال",
+          "ابزار غیرفعال",
+          "راکد"
+        ],
+        1_000_000,
+        5_000_000
+      );
+
+      if (inactiveCandidate) {
+        result.inactiveDevices = inactiveCandidate.value;
+        result.sources.inactiveDevices = `کلیدواژه: ${inactiveCandidate.keyword}`;
+      }
+
+      /*
+        کارت‌خوان فعال:
+        ابتدا به صورت مستقیم جست‌وجو می‌شود.
+        اگر پیدا نشد، از کل منهای غیرفعال محاسبه خواهد شد.
+      */
+      const activeCandidate = findNumberNearKeywords(
+        completeText,
+        [
+          "فعال سیستمی",
+          "کارتخوان فعال",
+          "کارت‌خوان فعال",
+          "ابزار فعال",
+          "دستگاه فعال"
+        ],
+        5_000_000,
+        12_000_000
+      );
+
+      if (activeCandidate) {
+        result.activeDevices = activeCandidate.value;
+        result.sources.activeDevices = `کلیدواژه: ${activeCandidate.keyword}`;
+      }
+
+      if (
+        result.totalDevices !== null &&
+        result.inactiveDevices !== null &&
+        result.activeDevices === null
+      ) {
+        result.activeDevices = result.totalDevices - result.inactiveDevices;
+        result.sources.activeDevices = "محاسبه: کل منهای غیرفعال";
+      }
+
+      if (
+        result.totalDevices !== null &&
+        result.activeDevices !== null &&
+        result.inactiveDevices === null
+      ) {
+        result.inactiveDevices = result.totalDevices - result.activeDevices;
+        result.sources.inactiveDevices = "محاسبه: کل منهای فعال";
+      }
+
+      if (
+        result.totalDevices !== null &&
+        result.activeDevices !== null &&
+        result.inactiveDevices !== null
+      ) {
+        const difference = Math.abs(
+          result.totalDevices -
+          (result.activeDevices + result.inactiveDevices)
+        );
+
+        if (difference > 1000) {
+          result.warnings.push(
+            "جمع تعداد کارت‌خوان فعال و غیرفعال با تعداد کل هم‌خوان نیست؛ عددها را در PDF بررسی کن."
+          );
+        }
+      }
+
+      if (result.transactionCount === null) {
+        result.warnings.push(
+          "تعداد تراکنش کارت‌خوان فروشگاهی استخراج نشد."
+        );
+      }
+
+      if (result.transactionAmount === null) {
+        result.warnings.push(
+          "مبلغ تراکنش کارت‌خوان فروشگاهی استخراج نشد."
+        );
+      }
+
+      if (result.totalDevices === null) {
+        result.warnings.push(
+          "تعداد کل کارت‌خوان‌های شبکه استخراج نشد."
+        );
+      }
+
+      if (result.activeDevices === null) {
+        result.warnings.push(
+          "تعداد کارت‌خوان فعال سیستمی استخراج یا محاسبه نشد."
+        );
+      }
+
+      if (result.inactiveDevices === null) {
+        result.warnings.push(
+          "تعداد کارت‌خوان غیرفعال سیستمی استخراج یا محاسبه نشد."
+        );
+      }
+
+      return result;
+    }
+
+    function showPdfKpis(data) {
+      document.getElementById("kpiPosTxCount").textContent =
+        formatNumber(data.transactionCount);
+
+      document.getElementById("kpiPosTxAmount").textContent =
+        formatNumber(data.transactionAmount);
+
+      document.getElementById("kpiTotalPos").textContent =
+        formatNumber(data.totalDevices);
+
+      document.getElementById("kpiActivePos").textContent =
+        formatNumber(data.activeDevices);
+
+      document.getElementById("kpiInactivePos").textContent =
+        formatNumber(data.inactiveDevices);
+
+      document.getElementById("sourceTxCount").textContent =
+        data.sources.transactionCount || "";
+
+      document.getElementById("sourceTxAmount").textContent =
+        data.sources.transactionAmount || "";
+
+      document.getElementById("sourceTotalPos").textContent =
+        data.sources.totalDevices || "";
+
+      document.getElementById("sourceActivePos").textContent =
+        data.sources.activeDevices || "";
+
+      document.getElementById("sourceInactivePos").textContent =
+        data.sources.inactiveDevices || "";
+
+      if (data.period) {
+        periodText.textContent = `دوره گزارش: ${data.period}`;
+      } else {
+        periodText.textContent = "";
+      }
+
+      if (data.warnings.length) {
+        pdfWarnings.innerHTML =
+          "<strong>هشدارهای استخراج:</strong><br>" +
+          data.warnings.map((item) => `• ${item}`).join("<br>");
+
+        pdfWarnings.style.display = "block";
+      } else {
+        pdfWarnings.style.display = "none";
+      }
+
+      pdfKpiSection.style.display = "block";
+    }
+
+    function readPspFile(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+
+        reader.onload = (event) => {
+          try {
+            const bytes = new Uint8Array(event.target.result);
+            const workbook = XLSX.read(bytes, { type: "array" });
+            const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+            const rows = XLSX.utils.sheet_to_json(firstSheet);
+
+            const processedRows = rows.map((row) => {
+              const installed = Number(row.installed_pos || 0);
+              const active = Number(row.active_pos || 0);
+              const txCount = Number(row.total_tx_count || 0);
+              const txAmount = Number(row.total_tx_amount || 0);
+
+              return {
+                psp_name: row.psp_name || "-",
+                installed_pos: installed,
+                active_pos: active,
+                inactive_pos: installed - active,
+                total_tx_count: txCount,
+                total_tx_amount: txAmount,
+                tx_productivity_tp: installed ? txCount / installed : 0,
+                amount_productivity: installed ? txAmount / installed : 0,
+                average_tx_value_atv: txCount ? txAmount / txCount : 0
+              };
+            });
+
+            processedRows.sort(
+              (first, second) =>
+                second.tx_productivity_tp - first.tx_productivity_tp
+            );
+
+            processedRows.forEach((row, index) => {
+              row.rank = index + 1;
+            });
+
+            resolve(processedRows);
+          } catch (error) {
+            reject(error);
+          }
+        };
+
+        reader.onerror = () => reject(new Error("خواندن فایل ناموفق بود."));
+        reader.readAsArrayBuffer(file);
+      });
+    }
+
+    function showPspData(data) {
+      const totalInstalled = data.reduce(
+        (sum, row) => sum + row.installed_pos,
+        0
+      );
+
+      const totalActive = data.reduce(
+        (sum, row) => sum + row.active_pos,
+        0
+      );
+
+      const totalInactive = data.reduce(
+        (sum, row) => sum + row.inactive_pos,
+        0
+      );
+
+      document.getElementById("kpiTotalInstalled").textContent =
+        formatNumber(totalInstalled);
+
+      document.getElementById("kpiTotalActive").textContent =
+        formatNumber(totalActive);
+
+      document.getElementById("kpiTotalInactive").textContent =
+        formatNumber(totalInactive);
+
+      const tableBody = document.querySelector("#pspTable tbody");
+      tableBody.innerHTML = "";
+
+      data.forEach((row) => {
+        const tr = document.createElement("tr");
+
+        tr.innerHTML = `
+          <td>${formatNumber(row.rank)}</td>
+          <td>${row.psp_name}</td>
+          <td>${formatNumber(row.installed_pos)}</td>
+          <td>${formatNumber(row.inactive_pos)}</td>
+          <td>${Number(row.tx_productivity_tp).toLocaleString("fa-IR", {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+          })}</td>
+          <td>${formatNumber(Math.round(row.amount_productivity))} ریال</td>
+          <td>${formatNumber(Math.round(row.average_tx_value_atv))} ریال</td>
+        `;
+
+        tableBody.appendChild(tr);
+      });
+
+      pspSection.style.display = "block";
+    }
+
+    processBtn.addEventListener("click", async () => {
+      const pdfFile = shaparakPdfInput.files[0];
+      const pspFile = pspExcelInput.files[0];
+
+      if (!pdfFile && !pspFile) {
+        processStatus.textContent =
+          "لطفاً حداقل یک فایل PDF یا Excel/CSV انتخاب کن.";
+
+        return;
+      }
+
+      processBtn.disabled = true;
+      processStatus.textContent = "در حال پردازش فایل‌ها… لطفاً صبر کن.";
+      periodText.textContent = "";
+      pdfKpiSection.style.display = "none";
+      pspSection.style.display = "none";
+
+      try {
+        if (pdfFile) {
+          const pdfData = await extractShaparakPdf(pdfFile);
+          showPdfKpis(pdfData);
+        }
+
+        if (pspFile) {
+          const pspData = await readPspFile(pspFile);
+          showPspData(pspData);
+        }
+
+        sampleSection.style.display = "none";
+        processStatus.textContent = "پردازش با موفقیت انجام شد.";
+      } catch (error) {
+        console.error(error);
+
+        processStatus.textContent =
+          "خطا در پردازش فایل. اتصال اینترنت، ساختار PDF و فرمت فایل را بررسی کن.";
+      } finally {
+        processBtn.disabled = false;
+      }
+    });
+  </script>
